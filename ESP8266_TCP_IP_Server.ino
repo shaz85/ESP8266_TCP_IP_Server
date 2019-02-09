@@ -6,6 +6,7 @@
 #include <ESP8266WiFi.h>
 #include <Ticker.h>
 Ticker blinker;
+void (*resetFun)(void)=0;
 
 //IPAddress stip((192, 168, 0, 220); //ESP static ip
 //IPAddress gateway(192, 168, 0, 1);   //IP Address of your WiFi Router (Gateway)
@@ -20,6 +21,7 @@ void soft_isr(){
 }
 
 WiFiServer server(11000);
+char recieved_str[50] ;
 
   /**
   * ***************************************************************************
@@ -79,7 +81,7 @@ void loop(){
   
   WiFiClient client = server.available();
 
-  if(cnt_btn_pressed > 100)
+  if(cnt_btn_pressed > 20)
       get_new_ssid(); 
 
   if(Serial.available()){
@@ -88,15 +90,24 @@ void loop(){
   if (client) {
     Serial.println("Server is available");
     digitalWrite(BOARD_STATUS_LED_PIN, HIGH);
+    
+    int cnt=0;
     while (client.connected()) {
   
       if(cnt_btn_pressed > 100)
         get_new_ssid(); 
       
-      while (client.available()>0) {
+      while (client.available() > 0) {
         char c = client.read();
-        client.write(c);
-        Serial.write(c);
+        if(c == 10 || c==13 || cnt > 48){
+          action_recieved_cmd();
+          recieved_str[cnt]=0;
+          cnt=0;
+        }
+        else recieved_str[cnt++] =c;
+        
+        //client.write(c);
+        //Serial.write(c);
       }
       if(Serial.available()){
         client.write(Serial.read());

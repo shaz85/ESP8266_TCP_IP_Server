@@ -6,7 +6,7 @@ void get_new_ssid(){
       char ch = Serial.read();
       if(ch == 10 | ch == 13){
         save_setting();
-        ESP.restart();
+        //resetFun();
         break;
       }
       data_array[arr_cnt++] = ch;
