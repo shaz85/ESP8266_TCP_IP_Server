@@ -3,34 +3,23 @@
     It sends a "hello" message, and then prints received data.
 */
 #include "global.h"
-#define RELAY_1_PIN 16
-#define RELAY_2_PIN 5
-#define RELAY_3_PIN 4
-#define RELAY_4_PIN 0
-
-#define SERIAL_AP_CONFIG_PIN 2
-#define BOARD_STATUS_LED_PIN 14
-
-#define 
 #include <ESP8266WiFi.h>
-#include <Ticker.h>  //Ticker Library
+#include <Ticker.h>
+Ticker blinker;
 
-void changeState()
-{
-  digitalWrite(LED, !(digitalRead(LED)));  //Invert Current State of LED  
+//IPAddress stip((192, 168, 0, 220); //ESP static ip
+//IPAddress gateway(192, 168, 0, 1);   //IP Address of your WiFi Router (Gateway)
+//IPAddress subnet(255, 255, 255, 0);  //Subnet mask
+//IPAddress dns(8, 8, 8, 8);
+
+void soft_isr(){
+
+  if(digitalRead(SERIAL_AP_CONFIG_PIN)==0)
+    cnt_btn_pressed++; 
+
 }
 
-#ifndef STASSID
-#define STASSID "mitto net 03226600046"
-#define STAPSK  "shahzad786"
-#endif
 WiFiServer server(11000);
-
-const char* ssid     = STASSID;
-const char* password = STAPSK;
-char u_ssid[30],u_password[30];
-
-char data_array[200],arr_cnt;
 
   /**
   * ***************************************************************************
@@ -38,42 +27,38 @@ char data_array[200],arr_cnt;
   * ***************************************************************************
   */
 void setup() {
-  Serial.begin(115200);
+  
   initlization();
 
-  // We start by connecting to a WiFi network
-
-  Serial.println();
-  Serial.println();
   Serial.print("Connecting to ");
   Serial.println(u_ssid);
+  blinker.attach(0.05, soft_isr);
 
   /* Explicitly set the ESP8266 to be a WiFi-client, otherwise, it by default,
      would try to act as both a client and an access-point and could cause
      network-issues with your other WiFi-devices on your WiFi-network. */
   WiFi.mode(WIFI_STA);
+  //WiFi.config(stip);//, subnet, gateway, dns);
   WiFi.begin(u_ssid, u_password);
+  int i=0;
 
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+  while (WiFi.status() != WL_CONNECTED && i < 40) {
+    delay(4000);
     Serial.print(".");
+    i++;
+    if(cnt_btn_pressed > 100)
+      get_new_ssid();    
   }
 
   Serial.println("");
   Serial.println("WiFi connected");
-  Serial.println("IP address: ");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+ // WiFi.config(ip);
+  Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
   server.begin();
-  while(1){
-    if(Serial.available()){
-      char ch = Serial.read();
-      if(ch == 10 | ch == 13){
-        save_setting();
-        break;
-      }
-      data_array[arr_cnt++] = ch;
-    }
-  }
+  
 }
 
   /**
@@ -83,30 +68,39 @@ void setup() {
   */
 
 void loop(){
-  int i=0;
+  static int i=0;
+  delay(1);  i++;
+  //Serial.print(i);
+
+  if(i>999){
+    i=0;
+    digitalWrite(BOARD_STATUS_LED_PIN, !digitalRead(BOARD_STATUS_LED_PIN));
+  }
   
   WiFiClient client = server.available();
+
+  if(cnt_btn_pressed > 100)
+      get_new_ssid(); 
+
   if(Serial.available()){
     client.write(Serial.read());
   }
   if (client) {
     Serial.println("Server is available");
+    digitalWrite(BOARD_STATUS_LED_PIN, HIGH);
     while (client.connected()) {
-    i++;
-    if(i>2000){
-      i=0;
-      Serial.print("client is connected");
-    }
+  
+      if(cnt_btn_pressed > 100)
+        get_new_ssid(); 
+      
       while (client.available()>0) {
         char c = client.read();
+        client.write(c);
         Serial.write(c);
       }
       if(Serial.available()){
         client.write(Serial.read());
-      }
- 
-      delay(1);
-    }    
-
+      }       
+    }  
   }
 }

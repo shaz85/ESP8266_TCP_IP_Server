@@ -1,6 +1,15 @@
 #include <EEPROM.h>
 void initlization(){
+  Serial.begin(115200);
   EEPROM.begin(512);
+  pinMode(SERIAL_AP_CONFIG_PIN, INPUT);
+  pinMode(BOARD_STATUS_LED_PIN, OUTPUT);
+  
+  pinMode(RELAY_1_PIN, OUTPUT);
+  pinMode(RELAY_2_PIN, OUTPUT);
+  pinMode(RELAY_3_PIN, OUTPUT);
+  pinMode(RELAY_4_PIN, OUTPUT);
+
   int len =0;
   int address = 0;
   Serial.println("EEPROM settins");
