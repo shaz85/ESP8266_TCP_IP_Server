@@ -12,11 +12,11 @@ void (*resetFun)(void)=0;
 devices dev1, dev2, dev3, dev4; 
 WiFiClient client;
 
-/*IPAddress ip(192, 168, 0, 200); //ESP static ip
-IPAddress gateway(192, 168, 0, 1);   //IP Address of your WiFi Router (Gateway)
+IPAddress ip(192, 168, 13, 20); //ESP static ip
+IPAddress gateway(192, 168, 13, 1);   //IP Address of your WiFi Router (Gateway)
 IPAddress subnet(255, 255, 255, 0);  //Subnet mask
 IPAddress dns(8, 8, 8, 8);
-*/
+
 //IPAddress ip(192, 168, 0, 220);
 char flag_led=0, cnt;
 void soft_isr(){
@@ -39,21 +39,22 @@ void setup() {
   initlization();
 
   Serial.print("Connecting to ");
-  Serial.println(u_ssid);
+  Serial.println(u_ssid);Serial.println(" $ ");
+  Serial.println(u_password);
   blinker.attach(0.05, soft_isr);
-  //WiFi.disconnect();
+  WiFi.disconnect();
 
   /* Explicitly set the ESP8266 to be a WiFi-client, otherwise, it by default,
      would try to act as both a client and an access-point and could cause
      network-issues with your other WiFi-devices on your WiFi-network. */
   WiFi.mode(WIFI_STA);
- // WiFi.config(ip, subnet, gateway);//, dns);//, subnet, gateway, dns);
+  //WiFi.config(ip, subnet, gateway);//, dns);//, subnet, gateway, dns);
   WiFi.begin(u_ssid, u_password);
   int i=0;
 
   while (WiFi.status() != WL_CONNECTED && i < 40) {
     //WiFi.begin(u_ssid, u_password);
-    delay(10000);
+    delay(1000);
     Serial.print(".");
     i++;
     if(cnt_btn_pressed > 100)

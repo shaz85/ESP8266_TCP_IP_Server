@@ -1,5 +1,6 @@
 #include <EEPROM.h>
 void initlization(){
+  int i=0;
   Serial.begin(115200);
   EEPROM.begin(512);
   pinMode(SERIAL_AP_CONFIG_PIN, INPUT);
@@ -15,15 +16,17 @@ void initlization(){
   Serial.println("EEPROM settins");
   len = EEPROM.read(address++);
   if(len>0){
-    for(int i=0; i<len;i++){
-    Serial.write(EEPROM.read(address++));
-    }
-    
+    for( i=0; i<len;i++){
+      char rec = EEPROM.read(address++);   
+      u_ssid[i] = rec;   
+    }u_ssid[i]=0;
+    i=0;
     len = EEPROM.read(address++);
     if(len>0){
-      for(int i=0; i<len;i++){
-        Serial.write(EEPROM.read(address++));
-    }
+      for( i=0; i<len;i++){
+        char rec = EEPROM.read(address++);       
+        u_password[i]= rec;       
+    }u_password[i]=0;
     Serial.println("Done");
   
   }}

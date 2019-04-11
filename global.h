@@ -10,10 +10,10 @@
   ******************************************************************************
   */
 
-int RELAY_1_PIN = 16;
-int RELAY_2_PIN = 5;
-int RELAY_3_PIN = 4;
-int RELAY_4_PIN = 0;
+int RELAY_1_PIN = 16; //D0
+int RELAY_2_PIN = 5;  //D1
+int RELAY_3_PIN = 4;  //D2
+int RELAY_4_PIN = 0;  //D3
 
 int SERIAL_AP_CONFIG_PIN = 2;
 int BOARD_STATUS_LED_PIN = 14;
